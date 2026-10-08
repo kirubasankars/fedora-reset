@@ -27,7 +27,6 @@ RENDER_FLAGS = \
 	--boot-drive '$(BOOT_DRIVE)' \
 	--root-size-mb $(ROOT_SIZE_MB) \
 	--swap-size-mb $(SWAP_SIZE_MB) \
-	--opt-size-mb $(OPT_SIZE_MB) \
 	--admin-password-file $(ADMIN_PASSWORD_FILE) \
 	--root-password-file $(ROOT_PASSWORD_FILE) \
 	--admin-pubkey-file $(ADMIN_PUBKEY_FILE) \

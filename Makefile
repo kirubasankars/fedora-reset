@@ -28,7 +28,9 @@ help:
 	@echo
 	@echo "Source ISO: $(SRC_ISO)"
 	@echo "Login user: $(ADMIN_USER) via $(ADMIN_PUBKEY_FILE) (sudo, no password)"
-	@echo "/opt: $(OPT_SIZE_MB) MiB minimum; the install ISO gives it the rest of the disk"
+	@echo "Install source: Fedora $(FEDORA_RELEASE) Server (netinstall)"
+	@echo "Packages: core, make, rsync, podman, tree, htop, btop, sysstat, vim"
+	@echo "Root grows to fill the disk; /opt is a directory on /"
 	@echo "Overrides go in config.local.mk (see config.local.mk.example)"
 
 clean:

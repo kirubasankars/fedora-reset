@@ -1,7 +1,7 @@
 .PHONY: iso verify-src
 
 # Keep the source volume id. Anaconda finds stage2 by the label embedded in
-# the Fedora DVD (Fedora-S-dvd-x86_64-43); mkksiso preserves it unless -V is set.
+# the source ISO; mkksiso preserves it unless -V is set.
 #
 # The stock menu waits 60s on "Test this media & install" (default "1").
 # Select "Install" (entry 0), skip the wait, and drop the media check so the

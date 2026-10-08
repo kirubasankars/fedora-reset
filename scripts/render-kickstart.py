@@ -110,7 +110,7 @@ def bootloader(boot_drive: str) -> str:
     return command
 
 
-def install_partitioning(boot_drive: str, root_size: int, swap_size: int, opt_size: int) -> str:
+def install_partitioning(boot_drive: str, root_size: int, swap_size: int) -> str:
     lines = []
     clearpart = "clearpart --all --initlabel --disklabel=gpt"
     if boot_drive:
@@ -118,24 +118,25 @@ def install_partitioning(boot_drive: str, root_size: int, swap_size: int, opt_si
             sys.exit(f"invalid BOOT_DRIVE {boot_drive!r}")
         lines.append(f"ignoredisk --only-use={boot_drive}")
         clearpart += f" --drives={boot_drive}"
-    # / stays a fixed size. /opt takes the minimum and every remaining byte.
-    pv_size = root_size + swap_size + opt_size + 2048
+    # The PV fills the disk and / takes what swap does not.
     lines.extend(
         [
             "zerombr",
             clearpart,
             "reqpart --add-boot",
-            f"part pv.01 --fstype=lvmpv --size={pv_size} --grow",
+            "part pv.01 --fstype=lvmpv --size=1024 --grow",
             "volgroup fedora pv.01",
             f"logvol swap --vgname=fedora --name=swap --fstype=swap --size={swap_size}",
-            f"logvol / --vgname=fedora --name=root --fstype=xfs --size={root_size} --label=root",
-            f"logvol /opt --vgname=fedora --name=opt --fstype=xfs --size={opt_size} --grow --label=opt",
+            (
+                "logvol / --vgname=fedora --name=root --fstype=xfs "
+                f"--size={root_size} --grow --label=PRIMARY_ROOT"
+            ),
         ]
     )
     return "\n".join(lines)
 
 
-def image_partitioning(root_size: int, swap_size: int, opt_size: int, uefi: bool) -> str:
+def image_partitioning(root_size: int, swap_size: int, uefi: bool) -> str:
     lines = [
         "zerombr",
         "clearpart --all --initlabel --disklabel=gpt",
@@ -148,8 +149,7 @@ def image_partitioning(root_size: int, swap_size: int, opt_size: int, uefi: bool
         [
             "part /boot --fstype=xfs --size=1024",
             f"part swap --fstype=swap --size={swap_size}",
-            f"part / --fstype=xfs --size={root_size} --label=root",
-            f"part /opt --fstype=xfs --size={opt_size} --label=opt",
+            f"part / --fstype=xfs --size={root_size} --label=PRIMARY_ROOT",
         ]
     )
     return "\n".join(lines)
@@ -160,18 +160,29 @@ def render(args: argparse.Namespace) -> str:
         sys.exit(f"invalid HOSTNAME {args.hostname!r}")
     if args.layout == "install":
         partitioning = install_partitioning(
-            args.boot_drive, args.root_size_mb, args.swap_size_mb, args.opt_size_mb
+            args.boot_drive, args.root_size_mb, args.swap_size_mb
         )
         finish = "reboot --eject"
         drive = args.boot_drive
+        install_source = (
+            "url --url=https://download.fedoraproject.org/pub/fedora/linux/releases/"
+            f"{args.fedora_release}/Server/x86_64/os/\n"
+            "repo --name=everything --baseurl=https://download.fedoraproject.org/pub/fedora/linux/releases/"
+            f"{args.fedora_release}/Everything/x86_64/os/"
+        )
     elif args.layout == "image":
         # livemedia-creator sizes the disk from part --size and cannot use autopart.
         # The guest disk name is not the host BOOT_DRIVE, so ignore that setting.
         partitioning = image_partitioning(
-            args.root_size_mb, args.swap_size_mb, args.opt_size_mb, args.uefi
+            args.root_size_mb, args.swap_size_mb, args.uefi
         )
         finish = "shutdown"
         drive = ""
+        install_source = (
+            "cdrom\n"
+            "repo --name=everything --baseurl=https://download.fedoraproject.org/pub/fedora/linux/releases/"
+            f"{args.fedora_release}/Everything/x86_64/os/"
+        )
     else:
         sys.exit(f"unknown layout {args.layout!r}")
 
@@ -184,6 +195,7 @@ def render(args: argparse.Namespace) -> str:
         "AUTH": auth_commands(args),
         "BOOTLOADER": bootloader(drive),
         "PARTITIONING": partitioning,
+        "INSTALL_SOURCE": install_source,
         "FINISH": finish,
     }
 
@@ -206,22 +218,21 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--template", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--layout", choices=("install", "image"), required=True)
-    parser.add_argument("--fedora-release", default=os.environ.get("FEDORA_RELEASE", "43"))
+    parser.add_argument("--fedora-release", default=os.environ.get("FEDORA_RELEASE", "44"))
     parser.add_argument("--hostname", default="fedora-server")
     parser.add_argument("--timezone", default=os.environ.get("TIMEZONE", "UTC"))
     parser.add_argument("--admin-user", default=os.environ.get("ADMIN_USER", "agent"))
     parser.add_argument("--boot-drive", default=os.environ.get("BOOT_DRIVE", ""))
     parser.add_argument("--root-size-mb", type=int, default=int(os.environ.get("ROOT_SIZE_MB", "12288")))
     parser.add_argument("--swap-size-mb", type=int, default=int(os.environ.get("SWAP_SIZE_MB", "2048")))
-    parser.add_argument("--opt-size-mb", type=int, default=int(os.environ.get("OPT_SIZE_MB", "65536")))
     parser.add_argument("--admin-password-file", default=os.environ.get("ADMIN_PASSWORD_FILE", "secrets/admin.password"))
     parser.add_argument("--root-password-file", default=os.environ.get("ROOT_PASSWORD_FILE", "secrets/root.password"))
     parser.add_argument("--admin-pubkey-file", default=os.environ.get("ADMIN_PUBKEY_FILE", "secrets/id_ed25519.pub"))
     parser.add_argument("--uefi", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--dummy", action="store_true", help="syntax-check creds; do not use the output to install")
     args = parser.parse_args()
-    if args.root_size_mb < 4096 or args.swap_size_mb < 512 or args.opt_size_mb < 4096:
-        sys.exit("ROOT_SIZE_MB and OPT_SIZE_MB must be at least 4096, and SWAP_SIZE_MB at least 512")
+    if args.root_size_mb < 4096 or args.swap_size_mb < 512:
+        sys.exit("ROOT_SIZE_MB must be at least 4096, and SWAP_SIZE_MB at least 512")
     return args
 
 

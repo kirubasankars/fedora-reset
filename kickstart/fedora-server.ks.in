@@ -3,8 +3,9 @@
 #
 # make iso wipes every disk on the machine that boots it, unless BOOT_DRIVE
 # is set. make image installs into a new disk image and does not use BOOT_DRIVE.
-# / is fixed. /opt is a separate filesystem and receives the rest of the disk
-# on the install ISO. Packages below are on the Fedora Server DVD.
+# / is labeled PRIMARY_ROOT and grows to fill the disk. /opt is a directory on /.
+# The install source is the Fedora Server network tree used by the netinstall ISO.
+# The package set is the core group plus a few admin tools.
 
 text
 skipx
@@ -18,34 +19,38 @@ network --hostname=@HOSTNAME@ --bootproto=dhcp --device=link --activate --onboot
 @AUTH@
 @BOOTLOADER@
 @PARTITIONING@
-cdrom
+@INSTALL_SOURCE@
 firstboot --disable
 @FINISH@
 
-%addon com_redhat_kdump --enable --reserve-mb='auto'
-%end
-
 %packages --excludedocs
-@^server-product-environment
-@container-management
-@guest-agents
-@server-hardware-support
-podman
-vim-enhanced
+@core
+make
 rsync
-bash-completion
+podman
+tree
+htop
+btop
+sysstat
+vim
 -initial-setup
 -initial-setup-gui
 -cockpit*
+-firewalld
 %end
 
 %post --log=/root/ks-post.log --erroronfail
 systemctl set-default multi-user.target
-systemctl enable sshd.service
+systemctl enable sshd.service podman.socket
 systemctl mask cockpit.socket cockpit.service firewalld.service
 cat > /etc/sudoers.d/@ADMIN_USER@ <<'EOF'
 @ADMIN_USER@ ALL=(ALL) NOPASSWD: ALL
 EOF
 chmod 440 /etc/sudoers.d/@ADMIN_USER@
 visudo -cf /etc/sudoers.d/@ADMIN_USER@
+install -d -m 0755 /etc/issue.d
+cat > /etc/issue.d/ipaddr.issue <<'EOF'
+IP address: \4
+
+EOF
 %end

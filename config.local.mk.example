@@ -4,10 +4,8 @@
 # HOSTNAME = fileserver
 # TIMEZONE = America/New_York
 # ADMIN_USER = agent
-# Limit the destructive clearpart to one disk on the install ISO.
+# Limit clearpart to one disk only if the installer lists that exact name.
 # BOOT_DRIVE = nvme0n1
 # ROOT_SIZE_MB = 12288
 # SWAP_SIZE_MB = 2048
-# /opt is at least this many MiB. On the install ISO it also grows to fill the disk.
-# OPT_SIZE_MB = 65536
 # VIRT_UEFI = 1
