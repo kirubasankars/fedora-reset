@@ -11,10 +11,13 @@ iso: $(OUT_ISO)
 
 REFRESH_EFIBOOT ?= $(MAKEFILE_DIR)/scripts/refresh-efiboot.py
 
-$(OUT_ISO): $(KS) $(SRC_ISO) $(REFRESH_EFIBOOT)
+RECOVERY_DIR ?= $(MAKEFILE_DIR)/recovery
+
+$(OUT_ISO): $(KS) $(SRC_ISO) $(REFRESH_EFIBOOT) $(wildcard $(RECOVERY_DIR)/*)
 	$(PYTHON) $(VALIDATE_KS) $(KS_VERSION) $(KS)
 	rm -f $@
 	$(MKKSISO) --skip-mkefiboot --no-md5sum --ks $(KS) \
+		--add $(RECOVERY_DIR) \
 		--rm-args 'rd.live.check' \
 		-R 'set default="1"' 'set default="0"' \
 		-R 'set timeout=60' 'set timeout=0' \

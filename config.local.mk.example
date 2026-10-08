@@ -8,4 +8,6 @@
 # BOOT_DRIVE = nvme0n1
 # ROOT_SIZE_MB = 12288
 # SWAP_SIZE_MB = 2048
+# Recovery filesystem mounted at /mnt/recovery_data, label RECOVER_DATA.
+# RECOVERY_SIZE_MB = 32768
 # VIRT_UEFI = 1

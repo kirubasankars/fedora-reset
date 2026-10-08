@@ -27,9 +27,11 @@ RENDER_FLAGS = \
 	--boot-drive '$(BOOT_DRIVE)' \
 	--root-size-mb $(ROOT_SIZE_MB) \
 	--swap-size-mb $(SWAP_SIZE_MB) \
+	--recovery-size-mb $(RECOVERY_SIZE_MB) \
 	--admin-password-file $(ADMIN_PASSWORD_FILE) \
 	--root-password-file $(ROOT_PASSWORD_FILE) \
 	--admin-pubkey-file $(ADMIN_PUBKEY_FILE) \
+	--recovery-dir $(MAKEFILE_DIR)/recovery \
 	$(if $(filter 1,$(VIRT_UEFI)),--uefi,--no-uefi)
 
 .PHONY: deps
