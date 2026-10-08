@@ -182,8 +182,20 @@ def recovery_install(recovery_dir: Path) -> str:
 
 
 def render(args: argparse.Namespace) -> str:
-    if not HOSTNAME_RE.fullmatch(args.hostname):
+    if args.hostname and not HOSTNAME_RE.fullmatch(args.hostname):
         sys.exit(f"invalid HOSTNAME {args.hostname!r}")
+    if args.hostname:
+        hostname_option = f" --hostname={args.hostname}"
+        hostname_setup = ""
+    else:
+        # Chosen here, not when the ISO is built, so two installs differ.
+        hostname_option = ""
+        hostname_setup = "\n".join(
+            [
+                "name=$(python3 -c 'import secrets; print(\"fedora-\" + secrets.token_hex(3))')",
+                "printf '%s\\n' \"$name\" > /etc/hostname",
+            ]
+        )
     if args.layout == "install":
         partitioning = install_partitioning(
             args.boot_drive, args.root_size_mb, args.swap_size_mb, args.recovery_size_mb
@@ -216,7 +228,8 @@ def render(args: argparse.Namespace) -> str:
     values = {
         "FEDORA_RELEASE": args.fedora_release,
         "TIMEZONE": args.timezone,
-        "HOSTNAME": args.hostname,
+        "HOSTNAME_OPTION": hostname_option,
+        "HOSTNAME_SETUP": hostname_setup,
         "ADMIN_USER": args.admin_user,
         "AUTH": auth_commands(args),
         "BOOTLOADER": bootloader(drive),
@@ -246,7 +259,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", required=True)
     parser.add_argument("--layout", choices=("install", "image"), required=True)
     parser.add_argument("--fedora-release", default=os.environ.get("FEDORA_RELEASE", "43"))
-    parser.add_argument("--hostname", default="fedora-server")
+    parser.add_argument("--hostname", default="")
     parser.add_argument("--timezone", default=os.environ.get("TIMEZONE", "UTC"))
     parser.add_argument("--admin-user", default=os.environ.get("ADMIN_USER", "agent"))
     parser.add_argument("--boot-drive", default=os.environ.get("BOOT_DRIVE", ""))

@@ -18,7 +18,7 @@ timezone @TIMEZONE@ --utc
 timesource --ntp-pool=0.fedora.pool.ntp.org
 selinux --enforcing
 firewall --disabled
-network --hostname=@HOSTNAME@ --bootproto=dhcp --device=link --activate --onboot=yes
+network@HOSTNAME_OPTION@ --bootproto=dhcp --device=link --activate --onboot=yes
 @AUTH@
 @BOOTLOADER@
 @PARTITIONING@
@@ -39,6 +39,12 @@ htop
 btop
 sysstat
 vim
+bpftrace
+bcc-tools
+python3-bcc
+bpftool
+clang
+llvm
 -initial-setup
 -initial-setup-gui
 -cockpit*
@@ -46,8 +52,9 @@ vim
 %end
 
 %post --log=/root/ks-post.log --erroronfail
+@HOSTNAME_SETUP@
 systemctl set-default multi-user.target
-systemctl enable sshd.service podman.socket
+systemctl enable sshd.service podman.socket podman.service
 systemctl mask cockpit.socket cockpit.service firewalld.service
 cat > /etc/sudoers.d/@ADMIN_USER@ <<'EOF'
 @ADMIN_USER@ ALL=(ALL) NOPASSWD: ALL
@@ -61,6 +68,17 @@ IP address: \4
 EOF
 @RECOVERY_INSTALL@
 dnf -y upgrade --refresh
+# Docker CE is not in the Fedora repos. This tracks the current stable release.
+dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
+dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+systemctl enable docker.service
+usermod -aG docker @ADMIN_USER@
+# %packages cannot expand $(uname -r), and during %post that is the installer
+# kernel. Install headers for each kernel that landed on the target disk.
+for kver in /lib/modules/*; do
+    [ -d "$kver" ] || continue
+    dnf -y install "kernel-devel-$(basename "$kver")"
+done
 # Files written in %post (fstab, ld.so.cache, ...) can carry the wrong SELinux
 # label. Systemd then cannot read fstab, / stays read-only, and sshd fails.
 # Relabel before the baseline is captured so restores get correct labels.

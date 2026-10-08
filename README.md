@@ -25,11 +25,11 @@ The result is `out/Fedora-Server-netinst-x86_64-44-kickstart.iso`. It boots stra
 | `make verify-src` | Check the source ISO checksum |
 | `make clean` | Remove `out/` |
 
-Overrides go in `config.local.mk`. See `config.local.mk.example`. Assignments on the command line win: `make iso HOSTNAME=fileserver`.
+Overrides go in `config.local.mk`. See `config.local.mk.example`. Assignments on the command line win: `make iso HOSTNAME=fileserver`. Leave `HOSTNAME` unset and each install chooses its own name, such as `fedora-a1b2c3`.
 
 ## Installed system
 
-The login user is `agent`, created from `secrets/id_ed25519.pub`, with passwordless sudo. The console shows the current IPv4 address. Cockpit and firewalld are disabled. Podman is installed and its socket is enabled.
+The login user is `agent`, created from `secrets/id_ed25519.pub`, with passwordless sudo. The console shows the current IPv4 address. Cockpit and firewalld are disabled. Podman is installed and its socket is enabled. Docker CE (the current stable release), Buildx, and Compose are installed from Docker's Fedora repository, the `docker` service is enabled, and `agent` is in the `docker` group.
 
 `/` is XFS, labeled `PRIMARY_ROOT`, and grows to fill the disk. A 32 GiB XFS volume labeled `RECOVER_DATA` is mounted at `/mnt/recovery_data`. `/opt` is a directory on `/`.
 

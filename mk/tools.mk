@@ -21,7 +21,7 @@ endif
 RENDER_FLAGS = \
 	--template $(KS_TEMPLATE) \
 	--fedora-release $(FEDORA_RELEASE) \
-	--hostname $(HOSTNAME) \
+	$(if $(HOSTNAME),--hostname $(HOSTNAME)) \
 	--timezone $(TIMEZONE) \
 	--admin-user $(ADMIN_USER) \
 	--boot-drive '$(BOOT_DRIVE)' \

@@ -28,8 +28,9 @@ help:
 	@echo
 	@echo "Source ISO: $(SRC_ISO)"
 	@echo "Login user: $(ADMIN_USER) via $(ADMIN_PUBKEY_FILE) (sudo, no password)"
+	@echo "Hostname: $(if $(HOSTNAME),$(HOSTNAME),random per install)"
 	@echo "Install source: Fedora $(FEDORA_RELEASE) Server (netinstall)"
-	@echo "Packages: core, make, rsync, podman, bmap-tools, python3, dracut, tree, htop, btop, sysstat, vim"
+	@echo "Packages: core, make, rsync, podman, docker-ce, bmap-tools, python3, dracut, tree, htop, btop, sysstat, vim, kernel-devel"
 	@echo "Root (PRIMARY_ROOT) grows to fill the disk after a $(RECOVERY_SIZE_MB) MiB recovery volume"
 	@echo "Overrides go in config.local.mk (see config.local.mk.example)"
 

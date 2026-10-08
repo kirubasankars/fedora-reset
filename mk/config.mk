@@ -12,7 +12,8 @@ IMAGE_KS    ?= $(OUT_DIR)/fedora-server-image.ks
 OUT_ISO     ?= $(OUT_DIR)/Fedora-Server-$(ISO_KIND)-$(FEDORA_ARCH)-$(FEDORA_RELEASE)-kickstart.iso
 
 ADMIN_USER  ?= agent
-HOSTNAME    ?= fedora-server
+# Empty means each install picks its own name. Set this for a fixed name.
+HOSTNAME    ?=
 TIMEZONE    ?= UTC
 BOOT_DRIVE  ?=
 ROOT_SIZE_MB     ?= 12288
@@ -34,7 +35,7 @@ IMAGE_VCPUS ?= 2
 # The build machine exports HOSTNAME. Keep that from becoming the installed name
 # unless it is set on the make command line or in config.local.mk.
 ifeq ($(origin HOSTNAME),environment)
-HOSTNAME := fedora-server
+HOSTNAME :=
 endif
 
 -include $(MAKEFILE_DIR)/config.local.mk

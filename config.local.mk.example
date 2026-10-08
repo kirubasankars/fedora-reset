@@ -1,6 +1,7 @@
 # Copy to config.local.mk to override build settings.
 # Command-line assignments still win: make iso HOSTNAME=fileserver
 
+# Leave unset for a random name on each install, such as fedora-a1b2c3.
 # HOSTNAME = fileserver
 # TIMEZONE = America/New_York
 # ADMIN_USER = agent
