@@ -1,0 +1,6 @@
+out/
+config.local.mk
+secrets/*
+!secrets/.gitignore
+*.iso
+__pycache__

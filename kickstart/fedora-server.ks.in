@@ -1,0 +1,51 @@
+# Fedora @FEDORA_RELEASE@ Server kickstart.
+# Generated from this template. Edit this file, then run make ks.
+#
+# make iso wipes every disk on the machine that boots it, unless BOOT_DRIVE
+# is set. make image installs into a new disk image and does not use BOOT_DRIVE.
+# / is fixed. /opt is a separate filesystem and receives the rest of the disk
+# on the install ISO. Packages below are on the Fedora Server DVD.
+
+text
+skipx
+lang en_US.UTF-8
+keyboard --vckeymap=us --xlayouts='us'
+timezone @TIMEZONE@ --utc
+timesource --ntp-pool=0.fedora.pool.ntp.org
+selinux --enforcing
+firewall --disabled
+network --hostname=@HOSTNAME@ --bootproto=dhcp --device=link --activate --onboot=yes
+@AUTH@
+@BOOTLOADER@
+@PARTITIONING@
+cdrom
+firstboot --disable
+@FINISH@
+
+%addon com_redhat_kdump --enable --reserve-mb='auto'
+%end
+
+%packages --excludedocs
+@^server-product-environment
+@container-management
+@guest-agents
+@server-hardware-support
+podman
+vim-enhanced
+rsync
+bash-completion
+-initial-setup
+-initial-setup-gui
+-cockpit*
+%end
+
+%post --log=/root/ks-post.log --erroronfail
+systemctl set-default multi-user.target
+systemctl enable sshd.service
+systemctl mask cockpit.socket cockpit.service firewalld.service
+cat > /etc/sudoers.d/@ADMIN_USER@ <<'EOF'
+@ADMIN_USER@ ALL=(ALL) NOPASSWD: ALL
+EOF
+chmod 440 /etc/sudoers.d/@ADMIN_USER@
+visudo -cf /etc/sudoers.d/@ADMIN_USER@
+%end

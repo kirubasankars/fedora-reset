@@ -1,0 +1,13 @@
+# Copy to config.local.mk to override build settings.
+# Command-line assignments still win: make iso HOSTNAME=fileserver
+
+# HOSTNAME = fileserver
+# TIMEZONE = America/New_York
+# ADMIN_USER = agent
+# Limit the destructive clearpart to one disk on the install ISO.
+# BOOT_DRIVE = nvme0n1
+# ROOT_SIZE_MB = 12288
+# SWAP_SIZE_MB = 2048
+# /opt is at least this many MiB. On the install ISO it also grows to fill the disk.
+# OPT_SIZE_MB = 65536
+# VIRT_UEFI = 1
