@@ -7,7 +7,7 @@
 # labeled RECOVER_DATA is mounted at /mnt/recovery_data. /opt is a directory on /.
 # The install source is the Fedora Server network tree used by the netinstall ISO.
 # The package set is the core group, plus make, rsync, podman, and the
-# recovery tools. The recovery scripts are copied to /usr/local/sbin, then
+# recovery tools. kickstart/recovery is copied to /usr/local/sbin, then
 # auto-reset.sh installs the boot hook and update-baseline.sh captures /.
 
 text

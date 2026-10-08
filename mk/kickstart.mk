@@ -6,7 +6,7 @@ $(OUT_DIR):
 	mkdir -p $@
 
 SECRET_FILES := $(wildcard $(ADMIN_PASSWORD_FILE) $(ROOT_PASSWORD_FILE) $(ADMIN_PUBKEY_FILE))
-RECOVERY_SCRIPTS := $(wildcard $(MAKEFILE_DIR)/recovery/*.sh)
+RECOVERY_SCRIPTS := $(wildcard $(MAKEFILE_DIR)/kickstart/recovery/*.sh)
 
 $(KS): $(KS_TEMPLATE) $(RENDER_KS) $(SECRET_FILES) $(RECOVERY_SCRIPTS) | $(OUT_DIR)
 	$(PYTHON) $(RENDER_KS) $(RENDER_FLAGS) --layout install --output $@

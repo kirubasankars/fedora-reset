@@ -31,7 +31,7 @@ RENDER_FLAGS = \
 	--admin-password-file $(ADMIN_PASSWORD_FILE) \
 	--root-password-file $(ROOT_PASSWORD_FILE) \
 	--admin-pubkey-file $(ADMIN_PUBKEY_FILE) \
-	--recovery-dir $(MAKEFILE_DIR)/recovery \
+	--recovery-dir $(MAKEFILE_DIR)/kickstart/recovery \
 	$(if $(filter 1,$(VIRT_UEFI)),--uefi,--no-uefi)
 
 .PHONY: deps

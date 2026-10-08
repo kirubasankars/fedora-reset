@@ -11,7 +11,7 @@ iso: $(OUT_ISO)
 
 REFRESH_EFIBOOT ?= $(MAKEFILE_DIR)/scripts/refresh-efiboot.py
 
-RECOVERY_DIR ?= $(MAKEFILE_DIR)/recovery
+RECOVERY_DIR ?= $(MAKEFILE_DIR)/kickstart/recovery
 
 $(OUT_ISO): $(KS) $(SRC_ISO) $(REFRESH_EFIBOOT) $(wildcard $(RECOVERY_DIR)/*)
 	$(PYTHON) $(VALIDATE_KS) $(KS_VERSION) $(KS)

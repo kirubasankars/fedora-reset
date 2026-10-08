@@ -256,7 +256,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--admin-password-file", default=os.environ.get("ADMIN_PASSWORD_FILE", "secrets/admin.password"))
     parser.add_argument("--root-password-file", default=os.environ.get("ROOT_PASSWORD_FILE", "secrets/root.password"))
     parser.add_argument("--admin-pubkey-file", default=os.environ.get("ADMIN_PUBKEY_FILE", "secrets/id_ed25519.pub"))
-    parser.add_argument("--recovery-dir", default="recovery")
+    parser.add_argument("--recovery-dir", default="kickstart/recovery")
     parser.add_argument("--uefi", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--dummy", action="store_true", help="syntax-check creds; do not use the output to install")
     args = parser.parse_args()
