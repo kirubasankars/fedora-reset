@@ -61,6 +61,10 @@ IP address: \4
 EOF
 @RECOVERY_INSTALL@
 dnf -y upgrade --refresh
+# Files written in %post (fstab, ld.so.cache, ...) can carry the wrong SELinux
+# label. Systemd then cannot read fstab, / stays read-only, and sshd fails.
+# Relabel before the baseline is captured so restores get correct labels.
+restorecon -RF -e /mnt/recovery_data /
 /usr/local/sbin/auto-reset.sh
 /usr/local/sbin/update-baseline.sh
 %end
